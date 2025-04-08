@@ -1,0 +1,16 @@
+<!-- pokemon/templates/pokemon/buscar_pokemon.html -->
+<h2>Buscar Pokémon</h2>
+<form method="GET">
+    <input type="text" name="nombre" placeholder="Buscar Pokémon" required>
+    <button type="submit">Buscar</button>
+</form>
+
+{% if pokemon %}
+    <h3>{{ pokemon.nombre }}</h3>
+    <p>Tipo: {{ pokemon.tipo }}</p>
+    {% if created %}
+        <p>¡Este Pokémon ha sido agregado a la base de datos!</p>
+    {% endif %}
+{% elif error %}
+    <p>{{ error }}</p>
+{% endif %}

@@ -15,8 +15,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from . import views  # Asegúrate de importar las vistas del archivo views.py de config
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('pokemon/', include('pokemon.urls')),  # Rutas de la aplicación pokemon
+
+    # Ruta para la página principal
+    path('', views.index, name='index'),  # Aquí le decimos a Django que use la vista 'index' en la raíz
 ]

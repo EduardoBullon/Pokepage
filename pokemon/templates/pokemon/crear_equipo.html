@@ -1,0 +1,7 @@
+<!-- pokemon/templates/pokemon/crear_equipo.html -->
+<h2>Crear un nuevo equipo de Pokémon</h2>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Crear equipo</button>
+</form>

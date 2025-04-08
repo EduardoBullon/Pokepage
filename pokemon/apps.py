@@ -1,6 +1,4 @@
 from django.apps import AppConfig
 
-
-class TeammasterConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'teammaster'
+class PokemonConfig(AppConfig):
+    name = 'pokemon'  # Aquí debe ser 'pokemon' y no 'teammaster'
