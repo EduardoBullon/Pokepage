@@ -8,6 +8,9 @@
     <!-- Cargar archivos estáticos -->
     {% load static %}
     
+    <!-- Agregar el favicon -->
+    <link rel="icon" href="{% static 'images/pokeicono.ico' %}" type="image/x-icon">
+    
     <!-- Incluir Font Awesome para el icono de volumen -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     
@@ -22,8 +25,19 @@
 
         h1 {
             color: #333;
+            font-size: 48px; /* Aumentado el tamaño del título */
         }
         
+        p {
+            font-size: 22px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro detrás del texto */
+            padding: 15px;
+            border-radius: 8px;
+            width: 80%;
+            margin: 20px auto;
+        }
+
         a {
             font-size: 18px;
             color: #007BFF;
@@ -36,14 +50,17 @@
             text-decoration: underline;
         }
 
+        /* Barra de navegación equitativa */
         .navbar {
             background-color: #333;
-            overflow: hidden;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
         }
 
         .navbar a {
-            float: left;
-            display: block;
             color: white;
             text-align: center;
             padding: 14px 16px;
@@ -110,14 +127,12 @@
 
     <div class="content">
         <h1>Bienvenido a Pokepage</h1>
-        <p>¡Bienvenido a la página de Pokémon! ¿Qué te gustaría hacer hoy?</p>
-        <a href="{% url 'buscar_pokemon' %}">Buscar Pokémon</a><br>
-        <a href="{% url 'crear_equipo' %}">Crear un equipo de Pokémon</a><br>
+        <p>¡Bienvenido a la página de Pokémon! Crea tus propios equipos de Pokémon para tus juegos favoritos de la saga. Escoge a tus Pokémon preferidos, forma tu equipo definitivo y prepárate para las mejores batallas. ¡Comienza a crear tu equipo y participa en la aventura más épica de todas!</p>
     </div>
 
     <!-- Icono de volumen -->
     <div id="volume-control" onclick="toggleSound()">
-        <i class="fas fa-volume-up"></i> <!-- Icono de volumen -->
+        <i class="fas fa-volume-mute"></i> <!-- Icono de volumen (muteado por defecto) -->
     </div>
 
     <script>

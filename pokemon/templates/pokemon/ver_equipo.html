@@ -1,10 +1,16 @@
-<!-- pokemon/templates/pokemon/ver_equipo.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalles del Equipo</title>
+    
+    <!-- Cargar archivos estáticos -->
+    {% load static %}
+    
+    <!-- Agregar el favicon -->
+    <link rel="icon" href="{% static 'images/pokeicono.ico' %}" type="image/x-icon">
+    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -124,7 +130,7 @@
                 <p>Altura: {{ pokemon.altura }} m</p>
                 <p>Peso: {{ pokemon.peso }} kg</p>
                 <div class="types">
-                    {% for tipo in pokemon.tipo %}
+                    {% for tipo in pokemon.tipo.split(', ') %}
                         <span class="type-badge">{{ tipo }}</span>
                     {% endfor %}
                 </div>
