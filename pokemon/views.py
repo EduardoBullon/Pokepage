@@ -3,32 +3,55 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Pokemon, Equipo
 from .forms import EquipoForm
 
+import requests
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Pokemon, Equipo
+from .forms import EquipoForm
+
+
 def buscar_pokemon(request):
     if request.method == "GET" and 'nombre' in request.GET:
         nombre = request.GET['nombre'].lower()  # Obtener el nombre del Pokémon desde la solicitud GET
         url = f"https://pokeapi.co/api/v2/pokemon/{nombre}/"  # URL de la PokeAPI
+        url_species = f"https://pokeapi.co/api/v2/pokemon-species/{nombre}/"  # URL para obtener la especie y descripción
 
         try:
             response = requests.get(url)  # Hacer la solicitud a la PokeAPI
             data = response.json()  # Convertir la respuesta a formato JSON
 
+            # Obtener la descripción del Pokémon desde la especie
+            response_species = requests.get(url_species)
+            species_data = response_species.json()
+
+            # Buscar la descripción (flavor_text_entries) en español
+            description = None
+            for entry in species_data['flavor_text_entries']:
+                if entry['language']['name'] == 'es':  # Usamos el idioma español para la descripción
+                    description = entry['flavor_text']
+                    break
+
             # Extraer los atributos relevantes del Pokémon
             tipo = ', '.join([t['type']['name'] for t in data['types']])
-            altura = data['height']  # Altura
-            peso = data['weight']  # Peso
+            
+            # Conversión de unidades
+            altura = data['height'] / 10  # Convertir decímetros a metros
+            peso = data['weight'] / 10  # Convertir hectogramos a kilogramos
+
             imagen = data['sprites']['front_default']  # Imagen
             numero_pokedex = data['id']  # Número en la Pokédex
 
-            # No guardamos el Pokémon automáticamente en la base de datos
+            # Contexto a pasar a la plantilla
             context = {
                 'pokemon': data['name'],
                 'imagen': imagen,
-                'altura': altura,
-                'peso': peso,
+                'altura': altura,  # Altura en metros
+                'peso': peso,  # Peso en kilogramos
                 'numero_pokedex': numero_pokedex,  # Añadimos el número de la Pokédex
-                'tipos': tipo.split(', ')  # Convertir tipos en lista
+                'tipos': tipo.split(', '),  # Convertir tipos en lista
+                'descripcion': description  # Descripción en español del Pokémon
             }
             return render(request, 'pokemon/buscar_pokemon.html', context)
+
         except requests.exceptions.RequestException as e:
             return render(request, 'pokemon/buscar_pokemon.html', {'error': 'Pokémon no encontrado'})
     return render(request, 'pokemon/buscar_pokemon.html')

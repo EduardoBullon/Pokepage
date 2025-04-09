@@ -49,56 +49,117 @@
 
         .search-container {
             margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
         }
 
-        .pokemon-container {
+        .search-container input {
+            font-size: 18px;
+            padding: 12px 20px;
+            width: 300px;
+            border-radius: 25px;
+            border: 2px solid #ccc;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .search-container input:focus {
+            border-color: #ff9b00;
+            outline: none;
+            box-shadow: 0 0 8px rgba(255, 155, 0, 0.5);
+        }
+
+        .search-container button {
+            padding: 12px 20px;
+            background-color: #ff9b00;
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-container button:hover {
+            background-color: #e68900;
+        }
+
+        /* Estilo para organizar la tarjeta y la descripción al lado */
+        .pokemon-info-container {
             display: flex;
-            flex-wrap: wrap;
             justify-content: center;
-            gap: 20px;
+            align-items: center; /* Centrado vertical */
+            gap: 40px; /* Separación entre la tarjeta y la descripción */
+            margin-top: 20px;
         }
 
         .pokemon-card {
             background: white;
             border: 2px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            width: 180px;
+            border-radius: 12px; 
+            padding: 30px;
+            width: 300px;
             text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .pokemon-card:hover {
+            transform: scale(1.10);
         }
 
         .pokemon-card img {
-            width: 100px;
-            height: 100px;
+            width: 220px;
+            height: 220px;
             object-fit: contain;
         }
 
         .pokemon-card h3 {
-            font-size: 18px;
-            margin: 10px 0;
+            font-size: 24px;
+            margin: 15px 0;
         }
 
         .pokemon-card p {
-            font-size: 14px;
-            margin: 5px 0;
+            font-size: 16px;
+            margin: 10px 0;
         }
 
         .pokemon-card .types {
             display: flex;
-            gap: 5px;
+            gap: 10px;
             justify-content: center;
         }
 
         .type-badge {
-            padding: 5px 10px;
+            padding: 8px 15px;
             background-color: #f1f1f1;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 14px;
         }
 
         .error-message {
             color: red;
+        }
+
+        .pokemon-description {
+            background: #f1f1f1;
+            border-radius: 12px;
+            padding: 20px;
+            width: 400px; /* Aumentado el ancho de la descripción */
+            text-align: left;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .pokemon-description h4 {
+            font-size: 26px; /* Fuente más grande para el título de la descripción */
+            margin-bottom: 15px;
+        }
+
+        .pokemon-description p {
+            font-size: 18px; /* Fuente más grande para el contenido de la descripción */
         }
     </style>
 </head>
@@ -121,11 +182,12 @@
     </div>
 
     {% if pokemon %}
-        <div class="pokemon-container">
+        <!-- Contenedor de la tarjeta y la descripción lado a lado -->
+        <div class="pokemon-info-container">
             <div class="pokemon-card">
                 <img src="{{ imagen }}" alt="Imagen de {{ pokemon }}">
                 <h3>{{ pokemon|title }}</h3>
-                <p>#{{ numero_pokedex }}</p> <!-- Mostrar el número de la Pokédex -->
+                <p>#{{ numero_pokedex }}</p>
                 <p>Altura: {{ altura }} m</p>
                 <p>Peso: {{ peso }} kg</p>
                 <div class="types">
@@ -133,6 +195,12 @@
                         <span class="type-badge">{{ tipo }}</span>
                     {% endfor %}
                 </div>
+            </div>
+
+            <!-- Sección de descripción del Pokémon -->
+            <div class="pokemon-description">
+                <h4>Descripción</h4>
+                <p>{{ descripcion }}</p>
             </div>
         </div>
     {% elif error %}
