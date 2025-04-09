@@ -4,16 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienvenido a Pokepage</title>
+    
+    <!-- Cargar archivos estáticos -->
+    {% load static %}
+    
+    <!-- Incluir Font Awesome para el icono de volumen -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f9f9f9;
             text-align: center;
             padding: 20px;
+            margin: 0;
         }
+
         h1 {
             color: #333;
         }
+        
         a {
             font-size: 18px;
             color: #007BFF;
@@ -21,13 +31,16 @@
             margin: 10px;
             display: inline-block;
         }
+        
         a:hover {
             text-decoration: underline;
         }
+
         .navbar {
             background-color: #333;
             overflow: hidden;
         }
+
         .navbar a {
             float: left;
             display: block;
@@ -36,14 +49,58 @@
             padding: 14px 16px;
             text-decoration: none;
         }
+
         .navbar a:hover {
             background-color: #ddd;
             color: black;
+        }
+
+        /* Estilos del video de fondo */
+        #video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1; /* Coloca el video detrás del contenido */
+            opacity: 0.6; /* Opacidad oscura fija */
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .content {
+            z-index: 1;
+            position: relative;
+        }
+
+        /* Icono de volumen */
+        #volume-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 30px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #volume-control:hover {
+            background-color: rgba(0, 0, 0, 0.8);
         }
     </style>
 </head>
 <body>
 
+    <!-- Video de fondo -->
+    <video id="video-background" autoplay muted loop>
+        <source src="{% static 'videos/pokemon_video.mp4' %}" type="video/mp4">
+        Tu navegador no soporta el formato de video.
+    </video>
+
+    <!-- Barra de navegación -->
     <div class="navbar">
         <a href="{% url 'index' %}">Inicio</a>
         <a href="{% url 'buscar_pokemon' %}">Buscar Pokémon</a>
@@ -51,9 +108,38 @@
         <a href="{% url 'equipos' %}">Ver equipos</a>
     </div>
 
-    <h1>Bienvenido a Pokepage</h1>
-    <p>¡Bienvenido a la página de Pokémon! ¿Qué te gustaría hacer hoy?</p>
-    <a href="{% url 'buscar_pokemon' %}">Buscar Pokémon</a><br>
-    <a href="{% url 'crear_equipo' %}">Crear un equipo de Pokémon</a><br>
+    <div class="content">
+        <h1>Bienvenido a Pokepage</h1>
+        <p>¡Bienvenido a la página de Pokémon! ¿Qué te gustaría hacer hoy?</p>
+        <a href="{% url 'buscar_pokemon' %}">Buscar Pokémon</a><br>
+        <a href="{% url 'crear_equipo' %}">Crear un equipo de Pokémon</a><br>
+    </div>
+
+    <!-- Icono de volumen -->
+    <div id="volume-control" onclick="toggleSound()">
+        <i class="fas fa-volume-up"></i> <!-- Icono de volumen -->
+    </div>
+
+    <script>
+        // Obtener el video y el icono de volumen
+        const video = document.getElementById('video-background');
+        const volumeControl = document.getElementById('volume-control');
+
+        // Variable para verificar el estado del sonido
+        let isMuted = true;
+
+        // Función para alternar el sonido
+        function toggleSound() {
+            if (isMuted) {
+                video.muted = false;
+                volumeControl.innerHTML = '<i class="fas fa-volume-up"></i>'; // Cambiar el icono a volumen alto
+            } else {
+                video.muted = true;
+                volumeControl.innerHTML = '<i class="fas fa-volume-mute"></i>'; // Cambiar el icono a volumen mudo
+            }
+            isMuted = !isMuted; // Cambiar el estado de mutado
+        }
+    </script>
+
 </body>
 </html>

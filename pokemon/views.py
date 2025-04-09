@@ -3,7 +3,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Pokemon, Equipo
 from .forms import EquipoForm
 
-# Vista para buscar un Pokémon desde la PokeAPI
 def buscar_pokemon(request):
     if request.method == "GET" and 'nombre' in request.GET:
         nombre = request.GET['nombre'].lower()  # Obtener el nombre del Pokémon desde la solicitud GET
@@ -18,6 +17,7 @@ def buscar_pokemon(request):
             altura = data['height']  # Altura
             peso = data['weight']  # Peso
             imagen = data['sprites']['front_default']  # Imagen
+            numero_pokedex = data['id']  # Número en la Pokédex
 
             # No guardamos el Pokémon automáticamente en la base de datos
             context = {
@@ -25,12 +25,14 @@ def buscar_pokemon(request):
                 'imagen': imagen,
                 'altura': altura,
                 'peso': peso,
+                'numero_pokedex': numero_pokedex,  # Añadimos el número de la Pokédex
                 'tipos': tipo.split(', ')  # Convertir tipos en lista
             }
             return render(request, 'pokemon/buscar_pokemon.html', context)
         except requests.exceptions.RequestException as e:
             return render(request, 'pokemon/buscar_pokemon.html', {'error': 'Pokémon no encontrado'})
     return render(request, 'pokemon/buscar_pokemon.html')
+
 
 # Vista para crear un equipo de Pokémon
 def crear_equipo(request):
