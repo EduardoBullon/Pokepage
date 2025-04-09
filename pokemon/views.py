@@ -129,16 +129,24 @@ from django.http import JsonResponse
 from django.template.loader import render_to_string
 
 # Añadir Pokémon al equipo al presionar el botón "Agregar al equipo"
+# Añadir Pokémon al equipo al presionar el botón "Agregar al equipo"
+# Vista para agregar Pokémon al equipo
 def agregar_pokemon(request):
     if request.method == "POST":
         pokemon_id = request.POST.get('pokemon_id')
         if pokemon_id:
-            # Verificar que el Pokémon no esté ya en el equipo
+            # Verifica si la sesión del equipo ya existe, si no la crea
             if 'equipo' not in request.session:
                 request.session['equipo'] = []
 
-            if pokemon_id not in request.session['equipo']:
-                request.session['equipo'].append(pokemon_id)
+            # Asegúrate de que no haya más de 6 Pokémon en el equipo
+            if len(request.session['equipo']) < 6:
+                # Agregar el Pokémon si no está ya en el equipo
+                if pokemon_id not in request.session['equipo']:
+                    request.session['equipo'].append(pokemon_id)
+
+                # Guardar la sesión
+                request.session.modified = True
 
             # Obtener los Pokémon del equipo actual
             equipo_actual = Pokemon.objects.filter(id__in=request.session['equipo'])
@@ -148,4 +156,5 @@ def agregar_pokemon(request):
                 'pokemon/seleccionados.html', {'equipo_actual': equipo_actual}
             )
             return JsonResponse({'pokemon_seleccionados_html': pokemon_seleccionados_html})
+    
     return JsonResponse({'error': 'No se pudo agregar el Pokémon'}, status=400)

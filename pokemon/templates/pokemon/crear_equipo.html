@@ -157,20 +157,23 @@
     {% if equipo_actual %}
     <h3>Pokémon seleccionados:</h3>
     <div class="pokemon-container" id="pokemon-seleccionados">
-        {% for pokemon in equipo_actual %}
-        <div class="pokemon-card">
-            <img src="{{ pokemon.imagen_url }}" alt="{{ pokemon.nombre }}">
-            <h3>{{ pokemon.nombre|title }}</h3>
-            <p>#{{ pokemon.numero_pokedex }}</p>
-            <p>Altura: {{ pokemon.altura }} m</p>
-            <p>Peso: {{ pokemon.peso }} kg</p>
-            <div class="types">
-                <span class="type-badge">{{ pokemon.tipo }}</span>
-            </div>
+    {% for pokemon in equipo_actual %}
+    <div class="pokemon-card">
+        <img src="{{ pokemon.imagen_url }}" alt="{{ pokemon.nombre }}">
+        <h3>{{ pokemon.nombre|title }}</h3>
+        <p>#{{ pokemon.numero_pokedex }}</p>
+        <p>Altura: {{ pokemon.altura }} m</p>
+        <p>Peso: {{ pokemon.peso }} kg</p>
+        <div class="types">
+            {% for tipo in pokemon.tipo %}
+                <span class="type-badge">{{ tipo }}</span>
+            {% endfor %}
         </div>
-        {% endfor %}
+    </div>
+    {% endfor %}
     </div>
     {% endif %}
+
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
