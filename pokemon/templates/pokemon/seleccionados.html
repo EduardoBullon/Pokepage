@@ -1,0 +1,16 @@
+<div class="pokemon-container">
+    {% for pokemon in equipo_actual %}
+    <div class="pokemon-card">
+        <img src="{{ pokemon.imagen_url }}" alt="{{ pokemon.nombre }}">
+        <h3>{{ pokemon.nombre|title }}</h3>
+        <p>#{{ pokemon.numero_pokedex }}</p>
+        <p>Altura: {{ pokemon.altura }} m</p>
+        <p>Peso: {{ pokemon.peso }} kg</p>
+        <div class="types">
+            {% for tipo in pokemon.tipo %}
+                <span class="type-badge">{{ tipo }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>

@@ -10,4 +10,5 @@ urlpatterns = [
     path('equipo/<int:pk>/eliminar/', views.eliminar_equipo, name='eliminar_equipo'),
     # Agrega la ruta para editar un equipo
     path('equipo/<int:pk>/editar/', views.editar_equipo, name='editar_equipo'),
+    path('agregar_pokemon/', views.agregar_pokemon, name='agregar_pokemon'),
 ]

@@ -4,11 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear un equipo de Pokémon</title>
-    
-    <!-- Cargar archivos estáticos -->
     {% load static %}
-    
-    <!-- Agregar el favicon -->
     <link rel="icon" href="{% static 'images/pokeicono.ico' %}" type="image/x-icon">
     
     <style>
@@ -21,7 +17,6 @@
             padding: 20px;
         }
 
-        /* Barra de navegación con estilo equitativo */
         .navbar {
             background-color: #333;
             display: flex;
@@ -88,6 +83,7 @@
             display: flex;
             gap: 5px;
             justify-content: center;
+            font-size: 14px;
         }
 
         .type-badge {
@@ -99,12 +95,25 @@
 
         .error-message {
             color: red;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: #ff9b00;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #e68900;
         }
     </style>
 </head>
 <body>
-
-    <!-- Barra de navegación -->
     <div class="navbar">
         <a href="{% url 'index' %}">Inicio</a>
         <a href="{% url 'buscar_pokemon' %}">Buscar Pokémon</a>
@@ -116,28 +125,89 @@
     <div class="search-container">
         <form method="GET">
             <input type="text" name="nombre" placeholder="Buscar Pokémon" required>
-            <button type="submit">Buscar</button>
+            <button type="submit" class="btn">Buscar</button>
         </form>
     </div>
+
+    {% if error %}
+        <div class="error-message">{{ error }}</div>
+    {% endif %}
 
     {% if pokemon %}
         <div class="pokemon-container">
             <div class="pokemon-card">
-                <img src="{{ imagen }}" alt="Imagen de {{ pokemon }}">
-                <h3>{{ pokemon|title }}</h3>
-                <p>#{{ numero_pokedex }}</p> <!-- Mostrar el número de la Pokédex -->
-                <p>Altura: {{ altura }} m</p>
-                <p>Peso: {{ peso }} kg</p>
+                <img src="{{ pokemon.imagen_url }}" alt="Imagen de {{ pokemon.nombre }}">
+                <h3>{{ pokemon.nombre|title }}</h3>
+                <p>#{{ pokemon.numero_pokedex }}</p>
+                <p>Altura: {{ pokemon.altura }} m</p>
+                <p>Peso: {{ pokemon.peso }} kg</p>
                 <div class="types">
-                    {% for tipo in tipos %}
-                        <span class="type-badge">{{ tipo }}</span>
-                    {% endfor %}
+                    <!-- Mostrar tipos sin separación extra -->
+                    <span class="type-badge">{{ pokemon.tipo }}</span>
                 </div>
+                <form method="POST" id="agregar-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="pokemon_id" value="{{ pokemon.id }}">
+                    <button type="submit" class="btn" id="agregar-boton">Agregar al equipo</button>
+                </form>
             </div>
         </div>
-    {% elif error %}
-        <p class="error-message">{{ error }}</p>
     {% endif %}
 
+    {% if equipo_actual %}
+    <h3>Pokémon seleccionados:</h3>
+    <div class="pokemon-container" id="pokemon-seleccionados">
+        {% for pokemon in equipo_actual %}
+        <div class="pokemon-card">
+            <img src="{{ pokemon.imagen_url }}" alt="{{ pokemon.nombre }}">
+            <h3>{{ pokemon.nombre|title }}</h3>
+            <p>#{{ pokemon.numero_pokedex }}</p>
+            <p>Altura: {{ pokemon.altura }} m</p>
+            <p>Peso: {{ pokemon.peso }} kg</p>
+            <div class="types">
+                <span class="type-badge">{{ pokemon.tipo }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            // Cuando se hace click en el botón de agregar al equipo
+            $('#agregar-form').submit(function(e){
+                e.preventDefault(); // Evita la recarga de la página
+        
+                var pokemonId = $('input[name="pokemon_id"]').val(); // Obtiene el ID del Pokémon
+        
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "agregar_pokemon" %}',  // Ajusta la URL si es necesario
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',
+                        'pokemon_id': pokemonId
+                    },
+                    success: function(response) {
+                        // Aquí se actualiza la sección de Pokémon seleccionados
+                        $('#pokemon-seleccionados').html(response.pokemon_seleccionados_html);
+        
+                        // Limpiar el campo de búsqueda
+                        $('input[name="nombre"]').val('');
+        
+                        // Mover la vista hacia abajo
+                        $('html, body').animate({
+                            scrollTop: $('#pokemon-seleccionados').offset().top
+                        }, 500);
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+            });
+        });
+    </script>
+    
 </body>
 </html>

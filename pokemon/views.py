@@ -1,54 +1,44 @@
-import requests
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Pokemon, Equipo
 from .forms import EquipoForm
-
 import requests
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Pokemon, Equipo
-from .forms import EquipoForm
+from django.http import JsonResponse
 
-
+# Vista para buscar un Pokémon
 def buscar_pokemon(request):
     if request.method == "GET" and 'nombre' in request.GET:
-        nombre = request.GET['nombre'].lower()  # Obtener el nombre del Pokémon desde la solicitud GET
-        url = f"https://pokeapi.co/api/v2/pokemon/{nombre}/"  # URL de la PokeAPI
-        url_species = f"https://pokeapi.co/api/v2/pokemon-species/{nombre}/"  # URL para obtener la especie y descripción
+        nombre = request.GET['nombre'].lower()
+        url = f"https://pokeapi.co/api/v2/pokemon/{nombre}/"
+        url_species = f"https://pokeapi.co/api/v2/pokemon-species/{nombre}/"
 
         try:
-            response = requests.get(url)  # Hacer la solicitud a la PokeAPI
-            data = response.json()  # Convertir la respuesta a formato JSON
+            response = requests.get(url)
+            data = response.json()
 
-            # Obtener la descripción del Pokémon desde la especie
+            # Obtener la descripción
             response_species = requests.get(url_species)
             species_data = response_species.json()
 
-            # Buscar la descripción (flavor_text_entries) en español
             description = None
             for entry in species_data['flavor_text_entries']:
-                if entry['language']['name'] == 'es':  # Usamos el idioma español para la descripción
+                if entry['language']['name'] == 'es': 
                     description = entry['flavor_text']
                     break
 
-            # Extraer los atributos relevantes del Pokémon
             tipo = ', '.join([t['type']['name'] for t in data['types']])
-            
-            # Conversión de unidades
             altura = data['height'] / 10  # Convertir decímetros a metros
             peso = data['weight'] / 10  # Convertir hectogramos a kilogramos
+            imagen = data['sprites']['front_default']
+            numero_pokedex = data['id']
 
-            imagen = data['sprites']['front_default']  # Imagen
-            numero_pokedex = data['id']  # Número en la Pokédex
-
-            # Contexto a pasar a la plantilla
             context = {
                 'pokemon': data['name'],
                 'imagen': imagen,
-                'altura': altura,  # Altura en metros
-                'peso': peso,  # Peso en kilogramos
-                'numero_pokedex': numero_pokedex,  # Añadimos el número de la Pokédex
-                'tipos': tipo.split(', '),  # Convertir tipos en lista
-                'descripcion': description  # Descripción en español del Pokémon
+                'altura': altura,
+                'peso': peso,
+                'numero_pokedex': numero_pokedex,
+                'tipos': tipo.split(', '),
+                'descripcion': description,
             }
             return render(request, 'pokemon/buscar_pokemon.html', context)
 
@@ -57,50 +47,50 @@ def buscar_pokemon(request):
     return render(request, 'pokemon/buscar_pokemon.html')
 
 
-# Vista para crear un equipo de Pokémon
 def crear_equipo(request):
-    if request.method == 'POST':
-        form = EquipoForm(request.POST)
-        if form.is_valid():  # Si el formulario es válido
-            equipo = form.save()  # Guardamos el equipo en la base de datos
-            return redirect('equipos')  # Redirigimos a la lista de equipos
-    else:
-        form = EquipoForm()
-
-    # Si se recibe un nombre de Pokémon en GET, buscamos ese Pokémon
     if request.method == "GET" and 'nombre' in request.GET:
-        nombre = request.GET['nombre'].lower()
-        url = f"https://pokeapi.co/api/v2/pokemon/{nombre}/"
+        nombre = request.GET['nombre'].lower()  # Obtener el nombre del Pokémon desde la solicitud GET
+        url = f"https://pokeapi.co/api/v2/pokemon/{nombre}/"  # URL de la PokeAPI
 
         try:
             response = requests.get(url)
             data = response.json()
 
             # Extraer la información relevante del Pokémon
-            tipo = ', '.join([t['type']['name'] for t in data['types']])
+            tipo = [t['type']['name'] for t in data['types']]  # Obtenemos los tipos como lista
+            imagen_url = data['sprites']['front_default']
+            numero_pokedex = data['id']
+            altura = data['height'] / 10  # Convertir de decímetros a metros
+            peso = data['weight'] / 10  # Convertir de hectogramos a kilogramos
 
-            # Verificar si el Pokémon existe en la base de datos o crear uno nuevo
+            # Verificar si el Pokémon ya está en la base de datos
             pokemon, created = Pokemon.objects.get_or_create(
                 nombre=data['name'],
-                tipo=tipo
+                tipo=','.join(tipo),  # Guardar como cadena separada por comas
+                altura=altura,
+                peso=peso,
+                imagen_url=imagen_url,
+                numero_pokedex=numero_pokedex
             )
 
             context = {
                 'pokemon': pokemon,
-                'created': created,
-                'form': form
+                'equipo_actual': Pokemon.objects.filter(id__in=request.session.get('equipo', []))  # Mostrar solo los Pokémon del equipo
             }
-            return render(request, 'pokemon/crear_equipo.html', context)
-        
-        except requests.exceptions.RequestException as e:
-            return render(request, 'pokemon/crear_equipo.html', {'error': 'Pokémon no encontrado', 'form': form})
 
-    return render(request, 'pokemon/crear_equipo.html', {'form': form})
+            return render(request, 'pokemon/crear_equipo.html', context)
+
+        except requests.exceptions.RequestException as e:
+            return render(request, 'pokemon/crear_equipo.html', {'error': 'Pokémon no encontrado'})
+
+    return render(request, 'pokemon/crear_equipo.html')
+
 
 # Vista para listar todos los equipos
 def listar_equipos(request):
     equipos = Equipo.objects.all()  # Obtiene todos los equipos
     return render(request, 'pokemon/listar_equipos.html', {'equipos': equipos})
+
 
 # Vista para ver los detalles de un equipo específico
 def ver_equipo(request, pk):
@@ -133,3 +123,29 @@ def eliminar_equipo(request, pk):
         equipo.delete()  # Elimina el equipo
         return redirect('equipos')  # Redirige a la lista de equipos
     return render(request, 'pokemon/eliminar_equipo.html', {'equipo': equipo})
+
+
+from django.http import JsonResponse
+from django.template.loader import render_to_string
+
+# Añadir Pokémon al equipo al presionar el botón "Agregar al equipo"
+def agregar_pokemon(request):
+    if request.method == "POST":
+        pokemon_id = request.POST.get('pokemon_id')
+        if pokemon_id:
+            # Verificar que el Pokémon no esté ya en el equipo
+            if 'equipo' not in request.session:
+                request.session['equipo'] = []
+
+            if pokemon_id not in request.session['equipo']:
+                request.session['equipo'].append(pokemon_id)
+
+            # Obtener los Pokémon del equipo actual
+            equipo_actual = Pokemon.objects.filter(id__in=request.session['equipo'])
+
+            # Retornar el HTML actualizado para el equipo
+            pokemon_seleccionados_html = render_to_string(
+                'pokemon/seleccionados.html', {'equipo_actual': equipo_actual}
+            )
+            return JsonResponse({'pokemon_seleccionados_html': pokemon_seleccionados_html})
+    return JsonResponse({'error': 'No se pudo agregar el Pokémon'}, status=400)
