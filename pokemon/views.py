@@ -1,5 +1,5 @@
 import requests
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Pokemon, Equipo
 from .forms import EquipoForm
 
@@ -13,30 +13,27 @@ def buscar_pokemon(request):
             response = requests.get(url)  # Hacer la solicitud a la PokeAPI
             data = response.json()  # Convertir la respuesta a formato JSON
 
-            # Extraer los tipos del Pokémon
+            # Extraer los atributos relevantes del Pokémon
             tipo = ', '.join([t['type']['name'] for t in data['types']])
+            altura = data['height']  # Altura
+            peso = data['weight']  # Peso
+            imagen = data['sprites']['front_default']  # Imagen
 
-            # Verificar si el Pokémon ya existe en la base de datos, si no, lo creamos
-            pokemon, created = Pokemon.objects.get_or_create(
-                nombre=data['name'],
-                tipo=tipo
-            )
-
-            # Enviar el contexto con el Pokémon y su creación
+            # No guardamos el Pokémon automáticamente en la base de datos
             context = {
-                'pokemon': pokemon,
-                'created': created
+                'pokemon': data['name'],
+                'imagen': imagen,
+                'altura': altura,
+                'peso': peso,
+                'tipos': tipo.split(', ')  # Convertir tipos en lista
             }
             return render(request, 'pokemon/buscar_pokemon.html', context)
         except requests.exceptions.RequestException as e:
-            # Si ocurre un error en la solicitud
             return render(request, 'pokemon/buscar_pokemon.html', {'error': 'Pokémon no encontrado'})
     return render(request, 'pokemon/buscar_pokemon.html')
 
-
 # Vista para crear un equipo de Pokémon
 def crear_equipo(request):
-    # Si el formulario se envía por POST
     if request.method == 'POST':
         form = EquipoForm(request.POST)
         if form.is_valid():  # Si el formulario es válido
@@ -75,22 +72,25 @@ def crear_equipo(request):
 
     return render(request, 'pokemon/crear_equipo.html', {'form': form})
 
-
 # Vista para listar todos los equipos
 def listar_equipos(request):
     equipos = Equipo.objects.all()  # Obtiene todos los equipos
     return render(request, 'pokemon/listar_equipos.html', {'equipos': equipos})
 
-
 # Vista para ver los detalles de un equipo específico
 def ver_equipo(request, pk):
-    equipo = Equipo.objects.get(pk=pk)  # Obtiene el equipo por ID
-    return render(request, 'pokemon/ver_equipo.html', {'equipo': equipo})
-
+    try:
+        equipo = Equipo.objects.get(pk=pk)  # Obtiene el equipo por ID
+        pokemon_equipo = equipo.pokemones.all()  # Accede a todos los Pokémon asociados a este equipo
+        
+        # No es necesario procesar los tipos de Pokémon aquí, lo gestionamos en la vista
+        return render(request, 'pokemon/ver_equipo.html', {'equipo': equipo, 'pokemon_equipo': pokemon_equipo})
+    except Equipo.DoesNotExist:
+        return render(request, 'pokemon/ver_equipo.html', {'error': 'Equipo no encontrado'})
 
 # Vista para editar un equipo existente
 def editar_equipo(request, pk):
-    equipo = Equipo.objects.get(pk=pk)
+    equipo = get_object_or_404(Equipo, pk=pk)
     if request.method == 'POST':
         form = EquipoForm(request.POST, instance=equipo)
         if form.is_valid():
@@ -101,12 +101,10 @@ def editar_equipo(request, pk):
     
     return render(request, 'pokemon/crear_equipo.html', {'form': form})
 
-
 # Vista para eliminar un equipo
 def eliminar_equipo(request, pk):
-    equipo = Equipo.objects.get(pk=pk)
+    equipo = Equipo.objects.get(pk=pk)  # Obtener el equipo por su ID
     if request.method == 'POST':
-        equipo.delete()  # Elimina el equipo de la base de datos
+        equipo.delete()  # Elimina el equipo
         return redirect('equipos')  # Redirige a la lista de equipos
-
     return render(request, 'pokemon/eliminar_equipo.html', {'equipo': equipo})

@@ -1,9 +1,10 @@
+<!-- pokemon/templates/pokemon/listar_equipos.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenido a Pokepage</title>
+    <title>Equipos de Pokémon</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,22 +12,11 @@
             text-align: center;
             padding: 20px;
         }
-        h1 {
-            color: #333;
-        }
-        a {
-            font-size: 18px;
-            color: #007BFF;
-            text-decoration: none;
-            margin: 10px;
-            display: inline-block;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
         .navbar {
             background-color: #333;
             overflow: hidden;
+            width: 100%;
+            margin-bottom: 20px;
         }
         .navbar a {
             float: left;
@@ -40,10 +30,26 @@
             background-color: #ddd;
             color: black;
         }
+        h1 {
+            color: #333;
+        }
+        .back-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
 
+    <!-- Barra de navegación -->
     <div class="navbar">
         <a href="{% url 'index' %}">Inicio</a>
         <a href="{% url 'buscar_pokemon' %}">Buscar Pokémon</a>
@@ -51,9 +57,17 @@
         <a href="{% url 'equipos' %}">Ver equipos</a>
     </div>
 
-    <h1>Bienvenido a Pokepage</h1>
-    <p>¡Bienvenido a la página de Pokémon! ¿Qué te gustaría hacer hoy?</p>
-    <a href="{% url 'buscar_pokemon' %}">Buscar Pokémon</a><br>
-    <a href="{% url 'crear_equipo' %}">Crear un equipo de Pokémon</a><br>
+    <h1>Equipos de Pokémon</h1>
+
+    <ul>
+        {% for equipo in equipos %}
+            <li><a href="{% url 'ver_equipo' equipo.pk %}">{{ equipo.nombre }}</a></li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'crear_equipo' %}">Crear un nuevo equipo</a>
+
+    <button class="back-button" onclick="window.history.back()">Volver</button>
+
 </body>
 </html>
